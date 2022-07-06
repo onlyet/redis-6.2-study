@@ -46,7 +46,7 @@
 
 /* Unused arguments generate annoying warnings... */
 #define DICT_NOTUSED(V) ((void) V)
-
+// 单独链表法解决哈希冲突
 typedef struct dictEntry {
     void *key;
     union {
@@ -58,7 +58,7 @@ typedef struct dictEntry {
     struct dictEntry *next;
 } dictEntry;
 
-typedef struct dictType {
+typedef struct   {
     uint64_t (*hashFunction)(const void *key);
     void *(*keyDup)(void *privdata, const void *key);
     void *(*valDup)(void *privdata, const void *obj);
@@ -71,16 +71,16 @@ typedef struct dictType {
 /* This is our hash table structure. Every dictionary has two of this as we
  * implement incremental rehashing, for the old to the new table. */
 typedef struct dictht {
-    dictEntry **table;
-    unsigned long size;
-    unsigned long sizemask;
-    unsigned long used;
+    dictEntry **table; // 链表的数组
+    unsigned long size; // 数组大小
+    unsigned long sizemask; // size - 1, 优化 %size 为 &(size-1)
+    unsigned long used; // 元素个数
 } dictht;
 
 typedef struct dict {
-    dictType *type;
+    dictType *type; // 多态：根据键值对的类型传入回调函数和privdata
     void *privdata;
-    dictht ht[2];
+    dictht ht[2]; // ht[1]在rehash时使用
     long rehashidx; /* rehashing not in progress if rehashidx == -1 */
     int16_t pauserehash; /* If >0 rehashing is paused (<0 indicates coding error) */
 } dict;
